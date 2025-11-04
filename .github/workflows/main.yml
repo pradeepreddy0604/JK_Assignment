@@ -1,0 +1,92 @@
+name: jk_assignment
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  perf-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      JMETER_TEST: tests/smoke.jmx
+      JMETER_RESULTS_DIR: perf-results
+      JMETER_OUTPUT_DIR: perf-results/dashboard
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java (required for JMeter)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install JMeter (Apache JMeter CLI)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y default-jdk wget unzip
+          wget -q https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.zip -O /tmp/jmeter.zip
+          unzip -q /tmp/jmeter.zip -d $HOME
+          export PATH="$HOME/apache-jmeter-5.6.3/bin:$PATH"
+          echo "JMETER_HOME=$HOME/apache-jmeter-5.6.3" >> $GITHUB_ENV
+          echo "$HOME/apache-jmeter-5.6.3/bin" >> $GITHUB_PATH
+
+      - name: Show JMeter version
+        run: jmeter -v
+
+      - name: Run JMeter smoke test (non-GUI)
+        # -n: non-GUI, -t: test plan, -l: results jtl, -j: jmeter log, -e -o: generate HTML report
+        run: |
+          mkdir -p $JMETER_RESULTS_DIR
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          RESULTS_JTL=$JMETER_RESULTS_DIR/results-${TIMESTAMP}.jtl
+          JMETER_LOG=$JMETER_RESULTS_DIR/jmeter-${TIMESTAMP}.log
+          # run a small smoke test (adjust threads/duration inside the .jmx)
+          jmeter -n -t "$JMETER_TEST" -l "$RESULTS_JTL" -j "$JMETER_LOG" -e -o "$JMETER_OUTPUT_DIR"
+        continue-on-error: false
+
+      - name: Collect summary (top-level)
+        run: |
+          echo "== JMeter log tail =="
+          tail -n 200 $JMETER_LOG || true
+          echo
+          echo "Contents of results folder:"
+          ls -la $JMETER_RESULTS_DIR || true
+
+      - name: Archive perf artifacts (JTL, logs, HTML dashboard)
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-smoke-artifacts
+          path: |
+            $JMETER_RESULTS_DIR
+            $JMETER_OUTPUT_DIR
+
+      - name: (Optional) Publish HTML dashboard to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./perf-results/dashboard
+          publish_branch: gh-pages
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+
+      - name: Fail build if high error rate (simple heuristic)
+        # Basic check: fail if "errors=" text appears in dashboard index summary
+        run: |
+          if grep -R "errors" -n perf-results/dashboard/index.html >/dev/null 2>&1; then
+            ERR_COUNT=$(grep -oP 'errors.*?([0-9]+)' perf-results/dashboard/index.html | grep -oP '[0-9]+' | head -n1 || echo 0)
+            echo "Detected errors: $ERR_COUNT"
+            if [ -n "$ERR_COUNT" ] && [ "$ERR_COUNT" -gt 0 ]; then
+              echo "Failing pipeline: detected $ERR_COUNT JMeter errors in smoke run."
+              exit 1
+            fi
+          else
+            echo "No error count found in dashboard index (cannot parse) — not failing based on HTML."
+          fi
