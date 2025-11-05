@@ -1,0 +1,112 @@
+name: JMeter Load Test Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  loadtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repo
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup Java
+      - name: Set up Java (Temurin 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Install JMeter
+      - name: Install JMeter 5.6.3
+        run: |
+          sudo apt update
+          sudo apt install -y wget tar
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xzf apache-jmeter-5.6.3.tgz
+          echo "export PATH=$PATH:$(pwd)/apache-jmeter-5.6.3/bin" >> $GITHUB_ENV
+
+      # Remove Old Container
+      - name: Remove Old Container if Exists
+        run: docker rm -f httpbin-container || true
+
+      # Build httpbin image using *your* folder
+      - name: Build httpbin Docker Image (Local Version)
+        run: |
+          docker build -t httpbin-app ./httpbin
+
+      # Run container
+      - name: Run httpbin Container
+        run: |
+          docker run -d -p 8080:80 --name httpbin-container httpbin-app
+          echo "Waiting 8 seconds for container startup..."
+          sleep 8
+          docker ps -a
+          docker logs httpbin-container --tail 50 || true
+
+      # Prepare results directories
+      - name: Prepare Results Directories
+        run: |
+          mkdir -p jtl_files
+          mkdir -p HTML_Reports
+
+      # Run JMeter
+      - name: Execute JMeter Load Test (NON-GUI)
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          JTL="jtl_files/httpbin_loadtest_${TIMESTAMP}.jtl"
+          REPORT="HTML_Reports/httpbin_loadtest_${TIMESTAMP}"
+          apache-jmeter-5.6.3/bin/jmeter \
+            -n \
+            -t Jmeter_scripts/httpbin_loadtest.jmx \
+            -l "$JTL" \
+            -e -o "$REPORT" \
+            -Jjmeter.exit.on.error=true
+
+      # Show generated outputs
+      - name: Show Output Summary
+        run: |
+          echo "==== JTL Files ===="
+          ls -l jtl_files
+          echo "==== HTML Reports ===="
+          ls -l HTML_Reports
+
+      # Commit results
+      - name: Commit and Push Results
+        run: |
+          git config --global user.email "k.pradeepreddy0604@gmail.com"
+          git config --global user.name "pradeepreddy0604"
+          git add jtl_files HTML_Reports || true
+          git commit -m "Automated Load Test Results - $(date)" || echo "No new files to commit"
+          git push
+
+      # ✅ Create gh-pages branch if missing
+      - name: Create gh-pages branch if missing
+        run: |
+          git fetch origin
+          if ! git show-ref --quiet refs/heads/gh-pages; then
+            git checkout --orphan gh-pages
+            git reset --hard
+            echo "<h1>GitHub Pages Initialized</h1>" > index.html
+            git add index.html
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          fi
+
+      # ✅ Deploy Reports to GitHub Pages
+      - name: Deploy HTML Reports to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./HTML_Reports
+          publish_branch: gh-pages
