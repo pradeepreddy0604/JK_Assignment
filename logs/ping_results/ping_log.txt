@@ -1,0 +1,88 @@
+Checking /
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0  9593    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 200 OK
+Server: gunicorn
+Date: Wed, 05 Nov 2025 11:19:10 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Content-Length: 9593
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+-------------------------------------
+Checking /get
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   188    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 200 OK
+Server: gunicorn
+Date: Wed, 05 Nov 2025 11:19:10 GMT
+Connection: keep-alive
+Content-Type: application/json
+Content-Length: 188
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+-------------------------------------
+Checking /post
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   178    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Wed, 05 Nov 2025 11:19:10 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: OPTIONS, POST
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+-------------------------------------
+Checking /put
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   178    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Wed, 05 Nov 2025 11:19:10 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: OPTIONS, PUT
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+-------------------------------------
+Checking /patch
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   178    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Wed, 05 Nov 2025 11:19:10 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: PATCH, OPTIONS
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+-------------------------------------
+Checking /delete
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   178    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Wed, 05 Nov 2025 11:19:10 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: DELETE, OPTIONS
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+-------------------------------------
