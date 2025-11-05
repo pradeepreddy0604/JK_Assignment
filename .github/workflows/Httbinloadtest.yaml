@@ -101,6 +101,13 @@ jobs:
           rm -rf LATEST_REPORT/*
           cp -r "$LATEST_FOLDER"/* LATEST_REPORT/
 
+      # Upload report as artifact (for deploy job)
+      - name: Upload Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-report
+          path: LATEST_REPORT/
+
       # Rename and store JMeter log
       - name: Rename JMeter Log
         run: |
@@ -121,9 +128,13 @@ jobs:
   deploy:
     needs: loadtest
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Download latest report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-report
+          path: LATEST_REPORT/
 
       - name: Deploy Latest HTML Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
