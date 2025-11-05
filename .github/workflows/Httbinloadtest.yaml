@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   loadtest:
@@ -31,42 +33,45 @@ jobs:
           tar -xzf apache-jmeter-5.6.3.tgz
           echo "export PATH=$PATH:$(pwd)/apache-jmeter-5.6.3/bin" >> $GITHUB_ENV
 
-      - name: Setup Log Folder and Patch Logging
+      - name: Patch Logging Configuration
         run: |
           mkdir -p logs/jmeter_logs
           sed -i 's|<Root level="INFO">|<Root level="DEBUG">|' apache-jmeter-5.6.3/bin/log4j2.xml
           sed -i 's|<FileName>.*</FileName>|<FileName>logs/jmeter_logs/jmeter.log</FileName>|' apache-jmeter-5.6.3/bin/log4j2.xml
-          sed -i 's|<FilePattern>.*</FilePattern>|<FilePattern>logs/jmeter_logs/jmeter-%d{MM-dd-yyyy}-%i.log.gz</FilePattern>|' apache-jmeter-5.6.3/bin/log4j2.xml
 
       - name: Remove Old Container
         run: docker rm -f httpbin-container || true
 
-      - name: Build httpbin Docker Image (Local Version)
+      - name: Build httpbin Docker Image
         run: docker build -t httpbin-app ./httpbin
 
       - name: Run httpbin Container
         run: |
           docker run -d -p 8080:80 --name httpbin-container httpbin-app
-          echo "Waiting 8 seconds..."
+          echo "Waiting for container to start..."
           sleep 8
           docker ps -a
           docker logs httpbin-container --tail 50 || true
 
-      - name: Create Output Directories (Root Level)
+      - name: Prepare Output Directories
         run: |
           mkdir -p jtl_files
           mkdir -p HTML_Reports
           mkdir -p logs/ping_results
 
-      - name: Verify API Endpoint Reachability
+      - name: Verify API Endpoints
         run: |
-          for endpoint in "" get post put patch delete; do
-            echo "Checking /$endpoint" >> logs/ping_results/ping_log.txt
-            curl -I http://localhost:8080/$endpoint >> logs/ping_results/ping_log.txt 2>&1 || echo "FAILED /$endpoint" >> logs/ping_results/ping_log.txt
-            echo "-------------------------------------" >> logs/ping_results/ping_log.txt
-          done
+          PING_LOG="logs/ping_results/ping_log_$(date +%Y%m%d_%H%M%S).txt"
+          {
+            echo "---- HTTPBIN Endpoint Check ----"
+            for endpoint in get post put patch delete; do
+              echo "Checking /$endpoint"
+              curl -I http://localhost:8080/$endpoint
+              echo "--------------------------------"
+            done
+          } >> "$PING_LOG"
 
-      - name: Run JMeter Load Test
+      - name: Run JMeter Test
         run: |
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           SCRIPT_NAME="httpbin_loadtest"
@@ -83,13 +88,14 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           mv logs/jmeter_logs/jmeter.log logs/jmeter_logs/httpbin_loadtest_${TIMESTAMP}.log || true
 
-      - name: Commit Results to Repository
+      - name: Commit Results (Safe Push)
         run: |
           git config --global user.email "k.pradeepreddy0604@gmail.com"
           git config --global user.name "pradeepreddy0604"
           git add jtl_files HTML_Reports logs
-          git commit -m "Automated Load Test Results - $(date)" || echo "No new updates to commit"
-          git push
+          git commit -m "Automated Load Test Results - $(date)" || echo "No new changes"
+          git pull --rebase origin main || true
+          git push origin main || true
 
   deploy:
     needs: loadtest
