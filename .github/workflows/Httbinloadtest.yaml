@@ -16,18 +16,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repo
+      # Checkout repo
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Setup Java
+      # Setup Java
       - name: Set up Java (Temurin 17)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      # Step 3: Install JMeter
+      # Install JMeter
       - name: Install JMeter 5.6.3
         run: |
           sudo apt update
@@ -36,18 +36,18 @@ jobs:
           tar -xzf apache-jmeter-5.6.3.tgz
           echo "export PATH=$PATH:$(pwd)/apache-jmeter-5.6.3/bin" >> $GITHUB_ENV
 
-      # Step 4: Configure Logging
+      # Configure Logging
       - name: Patch Logging Configuration
         run: |
           mkdir -p logs/jmeter_logs
           sed -i 's|<Root level="INFO">|<Root level="DEBUG">|' apache-jmeter-5.6.3/bin/log4j2.xml
           sed -i 's|<FileName>.*</FileName>|<FileName>logs/jmeter_logs/jmeter.log</FileName>|' apache-jmeter-5.6.3/bin/log4j2.xml
 
-      # Step 5: Clean old container
+      # Clean old container
       - name: Remove Old Container
         run: docker rm -f httpbin-container || true
 
-      # Step 6: Build and Run local httpbin Docker image
+      # Build and Run local httpbin Docker image
       - name: Build httpbin Docker Image
         run: docker build -t httpbin-app ./httpbin
 
@@ -59,14 +59,14 @@ jobs:
           docker ps -a
           docker logs httpbin-container --tail 30 || true
 
-      # Step 7: Prepare output directories
+      # Prepare output directories
       - name: Prepare Output Directories
         run: |
           mkdir -p jtl_files
           mkdir -p HTML_Reports
           mkdir -p logs/ping_results
 
-      # Step 8: Verify endpoints before test
+      # Verify endpoints before test
       - name: Verify API Endpoints
         run: |
           PING_LOG="logs/ping_results/ping_log_$(date +%Y%m%d_%H%M%S).txt"
@@ -79,7 +79,7 @@ jobs:
             done
           } >> "$PING_LOG"
 
-      # Step 9: Run JMeter Test
+      # Run JMeter Test
       - name: Run JMeter Load Test
         run: |
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -92,7 +92,7 @@ jobs:
             -e -o "$REPORT" \
             -Jjmeter.exit.on.error=true
 
-      # Step 10: Copy latest report to publish folder
+      # Copy latest report to publish folder
       - name: Prepare Latest Report for GitHub Pages
         run: |
           mkdir -p LATEST_REPORT
@@ -101,13 +101,13 @@ jobs:
           rm -rf LATEST_REPORT/*
           cp -r "$LATEST_FOLDER"/* LATEST_REPORT/
 
-      # Step 11: Rename and store JMeter log
+      # Rename and store JMeter log
       - name: Rename JMeter Log
         run: |
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           mv logs/jmeter_logs/jmeter.log logs/jmeter_logs/httpbin_loadtest_${TIMESTAMP}.log || true
 
-      # Step 12: Commit results back to repo safely
+      # Commit results back to repo safely
       - name: Commit Results (Safe Push)
         run: |
           git config --global user.email "k.pradeepreddy0604@gmail.com"
@@ -117,7 +117,7 @@ jobs:
           git pull --rebase origin main || true
           git push origin main || true
 
-  # Step 13: Deploy to GitHub Pages (latest report only)
+  # Deploy to GitHub Pages (latest report only)
   deploy:
     needs: loadtest
     runs-on: ubuntu-latest
