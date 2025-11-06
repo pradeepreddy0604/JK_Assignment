@@ -1,0 +1,60 @@
+---- HTTPBIN Endpoint Check ----
+Checking /get
+HTTP/1.1 200 OK
+Server: gunicorn
+Date: Thu, 06 Nov 2025 15:14:45 GMT
+Connection: keep-alive
+Content-Type: application/json
+Content-Length: 188
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+--------------------------------
+Checking /post
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Thu, 06 Nov 2025 15:14:45 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: POST, OPTIONS
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+--------------------------------
+Checking /put
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Thu, 06 Nov 2025 15:14:45 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: PUT, OPTIONS
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+--------------------------------
+Checking /patch
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Thu, 06 Nov 2025 15:14:45 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: PATCH, OPTIONS
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+--------------------------------
+Checking /delete
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Thu, 06 Nov 2025 15:14:45 GMT
+Connection: keep-alive
+Content-Type: text/html; charset=utf-8
+Allow: OPTIONS, DELETE
+Content-Length: 178
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+--------------------------------
