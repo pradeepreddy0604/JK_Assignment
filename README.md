@@ -25,6 +25,19 @@ The primary goal is to:
 
 ---
 
+## ⚡ GitHub Actions CI/CD Workflow
+
+The pipeline automatically:
+
+1. Checks out the repo.
+2. Installs Java + JMeter.
+3. Builds and runs the HTTPBin container.
+4. Executes JMeter tests (non-GUI mode).
+5. Generates **HTML reports**.
+6. Publishes the latest HTML report to the `gh-pages` branch.
+
+---
+
 ## ⚙️ Tools & Technology Stack
 
 | Component                  | Purpose                                        |
@@ -80,18 +93,7 @@ The primary goal is to:
 | Memory Utilization    | RAM usage during load         | ≤ 70%       |
 
 ---
-## ⚡ GitHub Actions CI/CD Workflow
 
-The pipeline automatically:
-
-1. Checks out the repo.
-2. Installs Java + JMeter.
-3. Builds and runs the HTTPBin container.
-4. Executes JMeter tests (non-GUI mode).
-5. Generates **HTML reports**.
-6. Publishes the latest HTML report to the `gh-pages` branch.
-
----
 ## 🧱 Test Scenarios (JMeter Plans)
 
 Each `.jmx` file contains:
