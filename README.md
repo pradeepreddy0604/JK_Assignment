@@ -1,4 +1,4 @@
-HTTPBin API Performance Testing Framework (JMeter + Docker + GitHub Actions)
+🧪 HTTPBin API Performance Testing Framework (JMeter + Docker + GitHub Actions)
 
 ---
 
