@@ -77,8 +77,8 @@ The pipeline automatically:
 | ------------------ | -------------------------------------------- | ------------------------------ |
 | **Load Test**      | Measure performance under expected user load | 50–500 users, 5 min            |
 | **Stress Test**    | without psce & think time                    | Gradual ramp-up until failures |
-| **Spike Test**     | Evaluate response to sudden surges           | 0 → 1000 users instantly       |
-| **Endurance Test** | Check long-term stability                    | 200 users for 1 hour           |
+| **Spike Test**     | Evaluate response to sudden surges           | 350 → 40 users instantly       |
+| **Endurance Test** | Check long-term stability                    | 350 users for 1 hour           |
 
 ---
 
