@@ -31,8 +31,7 @@ The primary goal is to:
 | -------------------------- | ---------------------------------------------- |
 | **Apache JMeter (v5.6.3)** | Performance test design and execution          |
 | **Docker**                 | API containerization (HTTPBin)                 |
-| **GitHub Actions**         | Automated CI/CD for performance testing        |
-| **cAdvisor**               | Resource monitoring (CPU, Memory, Network I/O) |
+| **GitHub Actions**         | Automated CI/CD for performance testing        ||
 | **Ubuntu (runner)**        | Execution environment for the pipeline         |
 
 ---
@@ -64,7 +63,7 @@ The primary goal is to:
 | Test Type          | Description                                  | Example Config                 |
 | ------------------ | -------------------------------------------- | ------------------------------ |
 | **Load Test**      | Measure performance under expected user load | 50–500 users, 5 min            |
-| **Stress Test**    | Identify system breaking point               | Gradual ramp-up until failures |
+| **Stress Test**    | without psce & think time                    | Gradual ramp-up until failures |
 | **Spike Test**     | Evaluate response to sudden surges           | 0 → 1000 users instantly       |
 | **Endurance Test** | Check long-term stability                    | 200 users for 1 hour           |
 
@@ -75,15 +74,24 @@ The primary goal is to:
 | KPI                   | Description                   | Target      |
 | --------------------- | ----------------------------- | ----------- |
 | Average Response Time | Mean time to serve requests   | ≤ 1 sec     |
-| 90th Percentile       | High-end latency              | ≤ 480 ms    |
-| 95th Percentile       | Upper latency bound           | ≤ 620 ms    |
 | Throughput            | Requests handled per second   | ≥ 100 req/s |
 | Error Rate            | Percentage of failed requests | ≤ 1%        |
 | CPU Utilization       | Server-side CPU usage         | ≤ 75%       |
 | Memory Utilization    | RAM usage during load         | ≤ 70%       |
 
 ---
+## ⚡ GitHub Actions CI/CD Workflow
 
+The pipeline automatically:
+
+1. Checks out the repo.
+2. Installs Java + JMeter.
+3. Builds and runs the HTTPBin container.
+4. Executes JMeter tests (non-GUI mode).
+5. Generates **HTML reports**.
+6. Publishes the latest HTML report to the `gh-pages` branch.
+
+---
 ## 🧱 Test Scenarios (JMeter Plans)
 
 Each `.jmx` file contains:
@@ -117,7 +125,7 @@ Verify:
 http://localhost:8080/get
 ```
 
-### Run cAdvisor for Container Monitoring:
+### Monitoring container resorce utilisation via Docker stats:
 
 ```bash
 docker run -d \
@@ -137,17 +145,6 @@ http://localhost:8081
 ```
 
 ---
-
-## ⚡ GitHub Actions CI/CD Workflow
-
-The pipeline automatically:
-
-1. Checks out the repo.
-2. Installs Java + JMeter.
-3. Builds and runs the HTTPBin container.
-4. Executes JMeter tests (non-GUI mode).
-5. Generates **HTML reports**.
-6. Publishes the latest HTML report to the `gh-pages` branch.
 
 ### Workflow File:
 
