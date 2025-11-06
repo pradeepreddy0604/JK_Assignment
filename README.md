@@ -1,4 +1,4 @@
-🧪 HTTPBin API Performance Testing Framework (JMeter + Docker + GitHub Actions)
+# 🧪 HTTPBin API Performance Testing Framework (JMeter + Docker + GitHub Actions)
 
 ---
 
@@ -197,5 +197,4 @@ Post-test analysis includes:
 * Error % and failure correlation.
 * Resource utilization patterns from cAdvisor.
 
-
-
+---
